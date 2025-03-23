@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { DragDropContext, Droppable, DropResult } from 'react-beautiful-dnd';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import Column from './Column';
+import ColumnComponent from './Column';
 import { cn } from '@/lib/utils';
 import { reorderTasks, moveTask } from '@/utils/board-utils';
 
@@ -178,7 +178,7 @@ const KanbanBoard: React.FC<KanbanBoardProps> = ({ initialData, className }) => 
                 );
 
                 return (
-                  <Column
+                  <ColumnComponent
                     key={column.id}
                     column={column}
                     tasks={tasks}

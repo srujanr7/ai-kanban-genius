@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Draggable, Droppable } from 'react-beautiful-dnd';
 import { MoreHorizontal, Plus } from 'lucide-react';
@@ -19,7 +18,7 @@ interface ColumnProps {
   index: number;
 }
 
-const Column: React.FC<ColumnProps> = ({ column, tasks, index }) => {
+const ColumnComponent: React.FC<ColumnProps> = ({ column, tasks, index }) => {
   const [isAddingTask, setIsAddingTask] = useState(false);
   const [newTaskTitle, setNewTaskTitle] = useState('');
 
@@ -134,4 +133,4 @@ const Column: React.FC<ColumnProps> = ({ column, tasks, index }) => {
   );
 };
 
-export default Column;
+export default ColumnComponent;
