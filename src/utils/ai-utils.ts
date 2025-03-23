@@ -1,553 +1,229 @@
 
+// This file contains utility functions for AI-related features
+
 import { Task } from '@/components/board/KanbanBoard';
 
-// Simulated AI processing function
+/**
+ * Process an AI prompt and generate tasks based on the project description
+ */
 export const processAIPrompt = async (prompt: string): Promise<Task[]> => {
   console.log('Processing AI prompt:', prompt);
   
-  // In a real implementation, this would call an AI service
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      const tasks = generateTasksFromPrompt(prompt);
-      console.log('Generated tasks:', tasks);
-      resolve(tasks);
-    }, 2000); // Simulate API call delay
-  });
-};
-
-// Generate tasks based on the prompt content
-const generateTasksFromPrompt = (prompt: string): Task[] => {
-  const promptLower = prompt.toLowerCase();
-  const tasks: Task[] = [];
-  const today = new Date();
+  // Analyze the prompt to extract key information
+  const projectType = extractProjectType(prompt);
+  const features = extractFeatures(prompt);
+  const complexity = determineComplexity(prompt);
   
-  // Extract potential project type from prompt
-  const projectType = determineProjectType(promptLower);
+  console.log('Extracted project type:', projectType);
+  console.log('Extracted features:', features);
+  console.log('Determined complexity:', complexity);
   
-  // Extract potential features from prompt
-  const features = extractFeatures(promptLower);
-  
-  // Generate tasks based on project type
-  generateProjectBaseTasks(tasks, projectType, today);
-  
-  // Generate feature-specific tasks
-  features.forEach(feature => {
-    generateFeatureTasks(tasks, feature, today);
-  });
-  
-  // If we don't have enough tasks, add some generic ones
-  if (tasks.length < 3) {
-    generateGenericTasks(tasks, today);
-  }
-  
-  // Log information about what was generated
-  console.log(`Generated ${tasks.length} tasks for project type: ${projectType}`);
-  console.log('Features detected:', features);
+  // Generate tasks based on the extracted information
+  const tasks = generateTasksFromFeatures(projectType, features, complexity);
   
   return tasks;
 };
 
-// Determine the primary project type from the prompt
-const determineProjectType = (promptLower: string): string => {
-  if (promptLower.includes('e-commerce') || promptLower.includes('shop') || promptLower.includes('store')) {
-    return 'e-commerce';
-  } else if (promptLower.includes('blog') || promptLower.includes('cms') || promptLower.includes('content')) {
-    return 'blog';
-  } else if (promptLower.includes('dashboard') || promptLower.includes('admin') || promptLower.includes('analytics')) {
-    return 'dashboard';
-  } else if (promptLower.includes('mobile') || promptLower.includes('app') || promptLower.includes('android') || promptLower.includes('ios')) {
-    return 'mobile-app';
-  } else if (promptLower.includes('game') || promptLower.includes('gaming')) {
-    return 'game';
-  } else if (promptLower.includes('social') || promptLower.includes('network') || promptLower.includes('community')) {
-    return 'social-network';
-  } else {
-    return 'website';
+/**
+ * Extract the type of project from the prompt
+ */
+const extractProjectType = (prompt: string): string => {
+  const promptLower = prompt.toLowerCase();
+  
+  const projectTypes = [
+    { type: 'e-commerce', keywords: ['e-commerce', 'ecommerce', 'online store', 'shop', 'marketplace'] },
+    { type: 'blog', keywords: ['blog', 'content management', 'articles', 'posts'] },
+    { type: 'portfolio', keywords: ['portfolio', 'showcase', 'personal site'] },
+    { type: 'social network', keywords: ['social network', 'social media', 'community'] },
+    { type: 'mobile app', keywords: ['mobile app', 'ios', 'android', 'application'] },
+    { type: 'dashboard', keywords: ['dashboard', 'admin panel', 'analytics'] },
+    { type: 'game', keywords: ['game', 'interactive', 'gaming'] },
+    { type: 'productivity', keywords: ['productivity', 'todo', 'task manager', 'calendar'] },
+  ];
+  
+  for (const { type, keywords } of projectTypes) {
+    if (keywords.some(keyword => promptLower.includes(keyword))) {
+      return type;
+    }
   }
+  
+  return 'web application'; // Default project type
 };
 
-// Extract potential features from the prompt
-const extractFeatures = (promptLower: string): string[] => {
+/**
+ * Extract potential features from the prompt
+ */
+const extractFeatures = (prompt: string): string[] => {
+  const promptLower = prompt.toLowerCase();
+  const potentialFeatures = [
+    { name: 'authentication', keywords: ['auth', 'login', 'signin', 'register', 'user accounts'] },
+    { name: 'search', keywords: ['search', 'filter', 'find'] },
+    { name: 'payments', keywords: ['payment', 'checkout', 'stripe', 'paypal'] },
+    { name: 'notifications', keywords: ['notification', 'alert', 'message'] },
+    { name: 'responsive design', keywords: ['responsive', 'mobile', 'desktop'] },
+    { name: 'dark mode', keywords: ['dark mode', 'theme', 'light mode'] },
+    { name: 'analytics', keywords: ['analytics', 'tracking', 'statistics'] },
+    { name: 'api integration', keywords: ['api', 'integration', 'third party'] },
+    { name: 'user profiles', keywords: ['profile', 'user info', 'accounts'] },
+    { name: 'data visualization', keywords: ['chart', 'graph', 'visualization'] },
+    { name: 'file upload', keywords: ['upload', 'file', 'image', 'document'] },
+    { name: 'comments', keywords: ['comment', 'discussion', 'reply'] },
+    { name: 'social sharing', keywords: ['social', 'share', 'facebook', 'twitter'] },
+    { name: 'cart', keywords: ['cart', 'basket', 'shopping'] },
+    { name: 'admin panel', keywords: ['admin', 'dashboard', 'management'] },
+    { name: 'real-time', keywords: ['real-time', 'live', 'websocket'] },
+    { name: 'subscription', keywords: ['subscription', 'recurring', 'plan'] },
+    { name: 'multi-language', keywords: ['localization', 'language', 'translation'] },
+    { name: 'SEO', keywords: ['seo', 'search engine', 'metadata'] },
+    { name: 'user permissions', keywords: ['permission', 'role', 'access control'] },
+  ];
+  
   const features: string[] = [];
   
-  // Authentication features
-  if (promptLower.includes('login') || promptLower.includes('auth') || promptLower.includes('user account')) {
-    features.push('authentication');
+  // Extract features based on keywords
+  for (const { name, keywords } of potentialFeatures) {
+    if (keywords.some(keyword => promptLower.includes(keyword))) {
+      features.push(name);
+    }
   }
   
-  // E-commerce features
-  if (promptLower.includes('cart') || promptLower.includes('checkout') || promptLower.includes('payment')) {
-    features.push('shopping-cart');
-  }
-  if (promptLower.includes('product') || promptLower.includes('catalog') || promptLower.includes('inventory')) {
-    features.push('product-catalog');
-  }
-  
-  // Content features
-  if (promptLower.includes('search') || promptLower.includes('filter')) {
-    features.push('search');
-  }
-  if (promptLower.includes('comment') || promptLower.includes('review')) {
-    features.push('comments');
+  // Add common features based on project type
+  const projectType = extractProjectType(prompt);
+  if (projectType === 'e-commerce') {
+    if (!features.includes('cart')) features.push('cart');
+    if (!features.includes('payments')) features.push('payments');
+    if (!features.includes('product listings')) features.push('product listings');
   }
   
-  // Technical requirements
-  if (promptLower.includes('performance') || promptLower.includes('speed') || promptLower.includes('optimization')) {
-    features.push('performance');
-  }
-  if (promptLower.includes('security') || promptLower.includes('secure')) {
-    features.push('security');
-  }
-  if (promptLower.includes('responsive') || promptLower.includes('mobile-friendly')) {
-    features.push('responsive-design');
-  }
-  if (promptLower.includes('api') || promptLower.includes('backend') || promptLower.includes('database')) {
-    features.push('api-integration');
+  if (projectType === 'blog') {
+    if (!features.includes('content management')) features.push('content management');
+    if (!features.includes('comments')) features.push('comments');
   }
   
-  // Additional features
-  if (promptLower.includes('notification') || promptLower.includes('alert')) {
-    features.push('notifications');
-  }
-  if (promptLower.includes('admin') || promptLower.includes('dashboard')) {
-    features.push('admin-panel');
-  }
-  if (promptLower.includes('analytics') || promptLower.includes('tracking')) {
-    features.push('analytics');
+  // If we have very few features, add some based on common sense
+  if (features.length < 3) {
+    if (!features.includes('responsive design')) features.push('responsive design');
+    if (!features.includes('authentication') && ['e-commerce', 'social network', 'dashboard'].includes(projectType)) {
+      features.push('authentication');
+    }
   }
   
   return features;
 };
 
-// Generate base tasks for the project type
-const generateProjectBaseTasks = (tasks: Task[], projectType: string, today: Date): void => {
-  // Common setup tasks for all project types
-  tasks.push({
-    id: `task-${Date.now()}-setup`,
-    title: `Setup ${projectType} project structure`,
-    description: 'Initialize repository and configure build tools',
-    priority: 'high',
-    tags: ['development', 'setup'],
-    assignee: {
-      id: 'user-1',
-      name: 'John Doe',
-    },
-    dueDate: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-  });
+/**
+ * Determine the complexity of the project
+ */
+const determineComplexity = (prompt: string): 'low' | 'medium' | 'high' => {
+  const features = extractFeatures(prompt);
   
-  // Project-specific base tasks
-  switch (projectType) {
-    case 'e-commerce':
-      tasks.push({
-        id: `task-${Date.now()}-ecommerce-1`,
-        title: 'Design product listing page',
-        description: 'Create responsive grid layout for product catalog',
-        priority: 'high',
-        tags: ['design', 'feature'],
-        assignee: {
-          id: 'user-4',
-          name: 'Emily Chen',
-        },
-        dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
-      break;
-      
-    case 'blog':
-      tasks.push({
-        id: `task-${Date.now()}-blog-1`,
-        title: 'Design blog post template',
-        description: 'Create responsive layout for blog articles with typography guidelines',
-        priority: 'high',
-        tags: ['design', 'feature'],
-        assignee: {
-          id: 'user-4',
-          name: 'Emily Chen',
-        },
-        dueDate: new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
-      break;
-      
-    case 'dashboard':
-      tasks.push({
-        id: `task-${Date.now()}-dashboard-1`,
-        title: 'Design dashboard layout',
-        description: 'Create responsive grid with widgets and data visualization components',
-        priority: 'high',
-        tags: ['design', 'feature'],
-        assignee: {
-          id: 'user-4',
-          name: 'Emily Chen',
-        },
-        dueDate: new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
-      break;
-      
-    case 'mobile-app':
-      tasks.push({
-        id: `task-${Date.now()}-mobile-1`,
-        title: 'Design mobile navigation',
-        description: 'Create navigation flow and UI components for mobile app',
-        priority: 'high',
-        tags: ['design', 'feature'],
-        assignee: {
-          id: 'user-4',
-          name: 'Emily Chen',
-        },
-        dueDate: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
-      break;
-      
-    case 'game':
-      tasks.push({
-        id: `task-${Date.now()}-game-1`,
-        title: 'Design game UI components',
-        description: 'Create buttons, menus, and game interface elements',
-        priority: 'high',
-        tags: ['design', 'ui'],
-        assignee: {
-          id: 'user-4',
-          name: 'Emily Chen',
-        },
-        dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
-      break;
-      
-    case 'social-network':
-      tasks.push({
-        id: `task-${Date.now()}-social-1`,
-        title: 'Design user profile page',
-        description: 'Create responsive layout for user profiles with activity feed',
-        priority: 'high',
-        tags: ['design', 'feature'],
-        assignee: {
-          id: 'user-4',
-          name: 'Emily Chen',
-        },
-        dueDate: new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
-      break;
-      
-    default: // Website or other
-      tasks.push({
-        id: `task-${Date.now()}-website-1`,
-        title: 'Design homepage layout',
-        description: 'Create responsive homepage with key sections and navigation',
-        priority: 'high',
-        tags: ['design', 'ui'],
-        assignee: {
-          id: 'user-4',
-          name: 'Emily Chen',
-        },
-        dueDate: new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      });
+  if (features.length > 8) {
+    return 'high';
+  } else if (features.length > 4) {
+    return 'medium';
+  } else {
+    return 'low';
   }
 };
 
-// Generate tasks for specific features
-const generateFeatureTasks = (tasks: Task[], feature: string, today: Date): void => {
-  const getRandomAssignee = (): { id: string; name: string } => {
-    const assignees = [
-      { id: 'user-1', name: 'John Doe' },
-      { id: 'user-2', name: 'Alice Smith' },
-      { id: 'user-3', name: 'Bob Johnson' },
-      { id: 'user-4', name: 'Emily Chen' },
-      { id: 'user-5', name: 'Mike Wilson' },
-    ];
-    return assignees[Math.floor(Math.random() * assignees.length)];
-  };
+/**
+ * Generate an array of tasks based on the extracted features
+ */
+const generateTasksFromFeatures = (
+  projectType: string, 
+  features: string[], 
+  complexity: 'low' | 'medium' | 'high'
+): Task[] => {
+  const tasks: Task[] = [];
+  const now = new Date();
   
-  const getRandomDueDate = (): string => {
-    const days = Math.floor(Math.random() * 14) + 3; // 3 to 16 days from now
-    return new Date(today.getTime() + days * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-  };
-  
-  // Create feature-specific tasks
-  switch (feature) {
-    case 'authentication':
-      tasks.push({
-        id: `task-${Date.now()}-auth-1`,
-        title: 'Implement user authentication flow',
-        description: 'Create registration, login, and password recovery functionality',
-        priority: 'high',
-        tags: ['security', 'feature'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-auth-2`,
-        title: 'Design auth UI components',
-        description: 'Create login forms, registration pages, and error states',
-        priority: 'medium',
-        tags: ['design', 'ui'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'shopping-cart':
-      tasks.push({
-        id: `task-${Date.now()}-cart-1`,
-        title: 'Implement shopping cart functionality',
-        description: 'Add/remove items, update quantities, and calculate totals',
-        priority: 'high',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-cart-2`,
-        title: 'Create checkout process',
-        description: 'Add payment integration, shipping options, and order confirmation',
-        priority: 'high',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'product-catalog':
-      tasks.push({
-        id: `task-${Date.now()}-catalog-1`,
-        title: 'Implement product catalog',
-        description: 'Build product listings with filtering and sorting capabilities',
-        priority: 'high',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-catalog-2`,
-        title: 'Create product detail page',
-        description: 'Design and implement detailed product view with images and specifications',
-        priority: 'medium',
-        tags: ['design', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'search':
-      tasks.push({
-        id: `task-${Date.now()}-search-1`,
-        title: 'Implement search functionality',
-        description: 'Create search interface with filters and sorting options',
-        priority: 'medium',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'comments':
-      tasks.push({
-        id: `task-${Date.now()}-comments-1`,
-        title: 'Design comments/review system',
-        description: 'Create UI for user comments, reviews, and ratings',
-        priority: 'low',
-        tags: ['feature', 'design'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-comments-2`,
-        title: 'Implement comments/review functionality',
-        description: 'Add backend integration for storing and retrieving user feedback',
-        priority: 'low',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'performance':
-      tasks.push({
-        id: `task-${Date.now()}-perf-1`,
-        title: 'Optimize image loading',
-        description: 'Implement lazy loading and responsive images',
-        priority: 'medium',
-        tags: ['performance', 'improvement'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-perf-2`,
-        title: 'Performance audit and optimization',
-        description: 'Run Lighthouse audits and address performance bottlenecks',
-        priority: 'medium',
-        tags: ['performance', 'improvement'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'security':
-      tasks.push({
-        id: `task-${Date.now()}-sec-1`,
-        title: 'Security audit',
-        description: 'Review code for potential vulnerabilities',
-        priority: 'high',
-        tags: ['security', 'bug'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-sec-2`,
-        title: 'Implement security measures',
-        description: 'Add CSRF protection, XSS prevention, and input validation',
-        priority: 'high',
-        tags: ['security', 'bug'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'responsive-design':
-      tasks.push({
-        id: `task-${Date.now()}-resp-1`,
-        title: 'Implement responsive layouts',
-        description: 'Ensure all pages adapt to various screen sizes',
-        priority: 'high',
-        tags: ['design', 'ui'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-resp-2`,
-        title: 'Mobile compatibility testing',
-        description: 'Test functionality on various mobile devices and browsers',
-        priority: 'medium',
-        tags: ['testing', 'qa'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'api-integration':
-      tasks.push({
-        id: `task-${Date.now()}-api-1`,
-        title: 'Design API structure',
-        description: 'Define API endpoints, authentication, and data models',
-        priority: 'high',
-        tags: ['development', 'backend'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-api-2`,
-        title: 'Implement API integration',
-        description: 'Connect frontend with backend API services',
-        priority: 'high',
-        tags: ['development', 'backend'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'notifications':
-      tasks.push({
-        id: `task-${Date.now()}-notif-1`,
-        title: 'Implement notification system',
-        description: 'Create UI for alerts, messages, and notifications',
-        priority: 'medium',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'admin-panel':
-      tasks.push({
-        id: `task-${Date.now()}-admin-1`,
-        title: 'Design admin dashboard',
-        description: 'Create UI for administrative controls and data management',
-        priority: 'medium',
-        tags: ['design', 'ui'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-admin-2`,
-        title: 'Implement admin functionality',
-        description: 'Add user management, content editing, and system settings',
-        priority: 'medium',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-      
-    case 'analytics':
-      tasks.push({
-        id: `task-${Date.now()}-analytics-1`,
-        title: 'Integrate analytics tracking',
-        description: 'Add tracking code and event monitoring',
-        priority: 'low',
-        tags: ['feature', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      
-      tasks.push({
-        id: `task-${Date.now()}-analytics-2`,
-        title: 'Create analytics dashboard',
-        description: 'Design UI for viewing usage metrics and trends',
-        priority: 'low',
-        tags: ['design', 'development'],
-        assignee: getRandomAssignee(),
-        dueDate: getRandomDueDate(),
-      });
-      break;
-  }
-};
-
-// Generate generic tasks when needed
-const generateGenericTasks = (tasks: Task[], today: Date): void => {
+  // Define task structure for project setup
   tasks.push({
-    id: `task-${Date.now()}-generic-1`,
-    title: 'Initial project setup',
-    description: 'Create repository and configure development environment',
+    id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    title: `Initial project setup for ${projectType}`,
+    description: `Set up the basic project structure, configure build tools, and establish the main architecture.`,
     priority: 'high',
-    tags: ['setup'],
-    assignee: {
-      id: 'user-1',
-      name: 'John Doe',
-    },
-    dueDate: new Date(today.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    tags: ['setup', 'architecture'],
+    dueDate: new Date(now.setDate(now.getDate() + 2)).toISOString().split('T')[0],
   });
   
+  // Create UI/UX design task
   tasks.push({
-    id: `task-${Date.now()}-generic-2`,
-    title: 'Design system implementation',
-    description: 'Create core UI components and style guide',
+    id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    title: 'Create UI/UX design mockups',
+    description: 'Design mockups for all key screens and user flows.',
+    priority: 'high',
+    tags: ['design', 'ui/ux'],
+    dueDate: new Date(now.setDate(now.getDate() + 3)).toISOString().split('T')[0],
+  });
+  
+  // Generate feature-specific tasks
+  const assignees = [
+    { id: 'user-1', name: 'Alex Johnson' },
+    { id: 'user-2', name: 'Taylor Smith' },
+    { id: 'user-3', name: 'Jordan Lee' },
+    { id: 'user-4', name: 'Morgan Chen' },
+  ];
+  
+  // Generate tasks for each feature
+  features.forEach((feature, index) => {
+    // Create frontend task
+    tasks.push({
+      id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+      title: `Implement ${feature} UI components`,
+      description: `Create and style all UI components needed for the ${feature} feature.`,
+      priority: index < 3 ? 'high' : index < 6 ? 'medium' : 'low',
+      tags: ['frontend', 'ui', feature.toLowerCase().replace(/\s+/g, '-')],
+      assignee: assignees[index % assignees.length],
+      dueDate: new Date(now.setDate(now.getDate() + 3 + index)).toISOString().split('T')[0],
+    });
+    
+    // Create backend task (if applicable)
+    if (!['responsive design', 'dark mode', 'SEO'].includes(feature)) {
+      tasks.push({
+        id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        title: `Develop ${feature} backend functionality`,
+        description: `Implement server-side logic and API endpoints for the ${feature} feature.`,
+        priority: index < 3 ? 'high' : index < 6 ? 'medium' : 'low',
+        tags: ['backend', 'api', feature.toLowerCase().replace(/\s+/g, '-')],
+        assignee: assignees[(index + 2) % assignees.length],
+        dueDate: new Date(now.setDate(now.getDate() + 4 + index)).toISOString().split('T')[0],
+      });
+    }
+    
+    // Create testing task for important features
+    if (index < 5) {
+      tasks.push({
+        id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+        title: `Write tests for ${feature}`,
+        description: `Create unit and integration tests for ${feature} functionality.`,
+        priority: 'medium',
+        tags: ['testing', feature.toLowerCase().replace(/\s+/g, '-')],
+        assignee: assignees[(index + 1) % assignees.length],
+        dueDate: new Date(now.setDate(now.getDate() + 5 + index)).toISOString().split('T')[0],
+      });
+    }
+  });
+  
+  // Add deployment task
+  tasks.push({
+    id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    title: 'Setup deployment pipeline',
+    description: 'Configure CI/CD pipeline for automated testing and deployment.',
     priority: 'medium',
-    tags: ['design', 'ui'],
-    assignee: {
-      id: 'user-4',
-      name: 'Emily Chen',
-    },
-    dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    tags: ['devops', 'deployment'],
+    dueDate: new Date(now.setDate(now.getDate() + 10)).toISOString().split('T')[0],
   });
   
+  // Add documentation task
   tasks.push({
-    id: `task-${Date.now()}-generic-3`,
-    title: 'Documentation',
-    description: 'Create comprehensive development documentation',
+    id: `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    title: 'Write project documentation',
+    description: 'Create comprehensive documentation for the project, including setup instructions and API docs.',
     priority: 'low',
     tags: ['documentation'],
-    assignee: {
-      id: 'user-2',
-      name: 'Alice Smith',
-    },
-    dueDate: new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+    dueDate: new Date(now.setDate(now.getDate() + 12)).toISOString().split('T')[0],
   });
+  
+  return tasks;
 };
-

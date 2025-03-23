@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { CalendarDays, Filter, Plus, Search, Users } from 'lucide-react';
 import KanbanBoard, { BoardData, Task } from '@/components/board/KanbanBoard';
@@ -107,6 +106,7 @@ const Board: React.FC = () => {
   const [showAIPrompt, setShowAIPrompt] = useState(false);
   const [boardData, setBoardData] = useState<BoardData>(mockBoardData);
   const [boardTitle, setBoardTitle] = useState<string>("E-commerce Project Board");
+  const [prompt, setPrompt] = useState<string>("");
   
   const handleGenerateBoard = (tasks: Task[]) => {
     console.log('Tasks received in Board component:', tasks);
@@ -181,24 +181,63 @@ const Board: React.FC = () => {
 
   // Helper to extract project type from tasks
   const extractProjectTypeFromTasks = (tasks: Task[]): string => {
+    // Look for setup task that might contain project type
+    const setupTask = tasks.find(task => 
+      task.title.toLowerCase().includes('setup') || 
+      task.title.toLowerCase().includes('initial')
+    );
+    
+    if (setupTask) {
+      const titleWords = setupTask.title.split(' ');
+      // Find "for [project type]" in the title
+      const forIndex = titleWords.findIndex(word => word.toLowerCase() === 'for');
+      if (forIndex !== -1 && forIndex < titleWords.length - 1) {
+        // Return everything after "for"
+        return titleWords.slice(forIndex + 1).join(' ').replace(/[.,]/g, '');
+      }
+    }
+    
     // Get all tags from tasks
     const allTags = tasks.flatMap(task => task.tags || []);
     
-    // Common project types to look for
-    const projectTypes = [
-      'e-commerce', 'blog', 'dashboard', 'mobile-app', 
-      'game', 'social-network', 'website'
-    ];
+    // Check for specific feature tags that might indicate project type
+    if (allTags.includes('cart') || allTags.includes('product-listings')) {
+      return 'E-commerce';
+    }
+    
+    if (allTags.includes('content-management') || allTags.includes('blog')) {
+      return 'Blog';
+    }
+    
+    if (allTags.includes('dashboard') || allTags.includes('analytics')) {
+      return 'Dashboard';
+    }
+    
+    if (allTags.includes('user-profiles') && allTags.includes('social-sharing')) {
+      return 'Social Network';
+    }
+    
+    if (allTags.includes('game')) {
+      return 'Game Development';
+    }
     
     // Check if tasks titles contain project type indicators
     for (const task of tasks) {
       const lowerTitle = task.title.toLowerCase();
-      for (const type of projectTypes) {
-        if (lowerTitle.includes(type.toLowerCase())) {
-          // Capitalize first letter of each word
-          return type.split('-')
-            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-            .join(' ');
+      const taskDescription = (task.description || '').toLowerCase();
+      
+      const projectTypeIndicators = [
+        { type: 'E-commerce', terms: ['e-commerce', 'ecommerce', 'shop', 'store'] },
+        { type: 'Blog', terms: ['blog', 'content management'] },
+        { type: 'Dashboard', terms: ['dashboard', 'admin panel'] },
+        { type: 'Mobile App', terms: ['mobile app', 'ios', 'android'] },
+        { type: 'Social Network', terms: ['social network', 'community'] },
+        { type: 'Portfolio', terms: ['portfolio', 'personal site'] },
+      ];
+      
+      for (const { type, terms } of projectTypeIndicators) {
+        if (terms.some(term => lowerTitle.includes(term) || taskDescription.includes(term))) {
+          return type;
         }
       }
     }

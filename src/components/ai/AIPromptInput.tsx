@@ -17,6 +17,7 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
   const [prompt, setPrompt] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [processingStage, setProcessingStage] = useState<string | null>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,6 +41,14 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
         description: "Identifying tasks, features, and requirements...",
       });
       
+      setProcessingStage("Analyzing project description");
+      // Small delay to show stages for UX
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setProcessingStage("Identifying key features");
+      await new Promise(resolve => setTimeout(resolve, 800));
+      
+      setProcessingStage("Generating tasks");
       // Get tasks from the AI processing function
       const generatedTasks = await processAIPrompt(prompt);
       
@@ -49,6 +58,9 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
       if (!generatedTasks || generatedTasks.length === 0) {
         throw new Error("No tasks could be generated");
       }
+      
+      setProcessingStage("Creating Kanban board");
+      await new Promise(resolve => setTimeout(resolve, 600));
       
       // Pass the tasks to the parent component
       onGenerateBoard(generatedTasks);
@@ -60,6 +72,7 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
       
       setPrompt('');
       setIsExpanded(false);
+      setProcessingStage(null);
     } catch (error) {
       console.error('Error generating board:', error);
       toast({
@@ -69,6 +82,7 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
       });
     } finally {
       setIsLoading(false);
+      setProcessingStage(null);
     }
   };
 
@@ -143,15 +157,22 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
             "min-h-[60px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base",
             isExpanded ? "min-h-[120px]" : "min-h-[60px]"
           )}
+          disabled={isLoading}
         />
         
         {isExpanded && (
           <div className="flex items-center justify-between mt-4">
-            <p className="text-xs text-muted-foreground">
-              Press <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">⌘</kbd> + 
-              <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1">Enter</kbd> 
-              <span className="mx-1">to submit</span>
-            </p>
+            {isLoading && processingStage ? (
+              <p className="text-xs text-muted-foreground animate-pulse">
+                {processingStage}...
+              </p>
+            ) : (
+              <p className="text-xs text-muted-foreground">
+                Press <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px]">⌘</kbd> + 
+                <kbd className="px-1 py-0.5 rounded bg-muted border text-[10px] ml-1">Enter</kbd> 
+                <span className="mx-1">to submit</span>
+              </p>
+            )}
             
             <Button
               type="submit"
@@ -161,7 +182,7 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Analyzing Project...
+                  {processingStage || "Analyzing Project..."}
                 </>
               ) : (
                 <>
