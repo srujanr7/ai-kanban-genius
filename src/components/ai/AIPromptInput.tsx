@@ -6,9 +6,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { cn } from '@/lib/utils';
 import { processAIPrompt } from '@/utils/ai-utils';
+import { Task } from '@/components/board/KanbanBoard';
 
 interface AIPromptInputProps {
-  onGenerateBoard: (tasks: any[]) => void;
+  onGenerateBoard: (tasks: Task[]) => void;
   className?: string;
 }
 
@@ -33,9 +34,14 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
     setIsLoading(true);
     
     try {
-      // Simulate AI processing
-      const tasks = await processAIPrompt(prompt);
-      onGenerateBoard(tasks);
+      // Get tasks from the AI processing function
+      const generatedTasks = await processAIPrompt(prompt);
+      
+      // Log the generated tasks for debugging
+      console.log('Generated tasks from AI:', generatedTasks);
+      
+      // Pass the tasks to the parent component
+      onGenerateBoard(generatedTasks);
       
       toast({
         title: "Board generated",
@@ -45,12 +51,12 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
       setPrompt('');
       setIsExpanded(false);
     } catch (error) {
+      console.error('Error generating board:', error);
       toast({
         title: "Error",
         description: "Failed to generate board. Please try again.",
         variant: "destructive",
       });
-      console.error(error);
     } finally {
       setIsLoading(false);
     }

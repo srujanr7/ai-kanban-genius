@@ -1,10 +1,10 @@
-
 import React, { useState } from 'react';
 import { CalendarDays, Filter, Plus, Search, Users } from 'lucide-react';
 import KanbanBoard, { BoardData, Task } from '@/components/board/KanbanBoard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import AIPromptInput from '@/components/ai/AIPromptInput';
+import { toast } from '@/components/ui/use-toast';
 
 const mockTasks: Record<string, Task> = {
   'task-1': {
@@ -107,12 +107,31 @@ const Board: React.FC = () => {
   const [boardData, setBoardData] = useState<BoardData>(mockBoardData);
   
   const handleGenerateBoard = (tasks: Task[]) => {
+    console.log('Tasks received in Board component:', tasks);
+    
+    if (!tasks || tasks.length === 0) {
+      toast({
+        title: "No tasks generated",
+        description: "Try a more detailed project description.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Convert the tasks array to the format expected by the board
     const newTasks: Record<string, Task> = {};
     const todoTaskIds: string[] = [];
     
     tasks.forEach(task => {
+      // Ensure the task has a valid ID
+      if (!task.id) {
+        task.id = `task-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+      }
+      
+      // Add task to the tasks record
       newTasks[task.id] = task;
+      
+      // Add task ID to the "To Do" column
       todoTaskIds.push(task.id);
     });
     
@@ -139,7 +158,18 @@ const Board: React.FC = () => {
       columnOrder: ['column-1', 'column-2', 'column-3'],
     };
     
+    console.log('New board data:', newBoardData);
+    
+    // Update the board with the new data
     setBoardData(newBoardData);
+    
+    // Show success toast
+    toast({
+      title: `${tasks.length} tasks created`,
+      description: "Your Kanban board has been generated successfully."
+    });
+    
+    // Hide the AI prompt
     setShowAIPrompt(false);
   };
 

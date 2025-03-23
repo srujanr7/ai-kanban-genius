@@ -1,12 +1,14 @@
-
 import { Task } from '@/components/board/KanbanBoard';
 
 // Simulated AI processing function
 export const processAIPrompt = async (prompt: string): Promise<Task[]> => {
+  console.log('Processing AI prompt:', prompt);
+  
   // In a real implementation, this would call an AI service
   return new Promise((resolve) => {
     setTimeout(() => {
       const tasks = generateMockTasksFromPrompt(prompt);
+      console.log('Generated tasks:', tasks);
       resolve(tasks);
     }, 2000); // Simulate API call delay
   });
@@ -30,7 +32,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-1',
         name: 'John Doe',
       },
-      dueDate: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
     
     tasks.push({
@@ -43,7 +45,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-2',
         name: 'Alice Smith',
       },
-      dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
   }
   
@@ -59,7 +61,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-3',
         name: 'Bob Johnson',
       },
-      dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
   }
   
@@ -75,7 +77,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-4',
         name: 'Emily Chen',
       },
-      dueDate: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
     
     tasks.push({
@@ -88,7 +90,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-1',
         name: 'John Doe',
       },
-      dueDate: new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 6 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
     
     tasks.push({
@@ -101,7 +103,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-3',
         name: 'Bob Johnson',
       },
-      dueDate: new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
   }
   
@@ -117,7 +119,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-2',
         name: 'Alice Smith',
       },
-      dueDate: new Date(today.getTime() + 8 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
     
     tasks.push({
@@ -130,7 +132,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-5',
         name: 'Mike Wilson',
       },
-      dueDate: new Date(today.getTime() + 12 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 12 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
   }
   
@@ -146,7 +148,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-3',
         name: 'Bob Johnson',
       },
-      dueDate: new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 4 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
     
     tasks.push({
@@ -159,7 +161,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-5',
         name: 'Mike Wilson',
       },
-      dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 5 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
   }
   
@@ -175,7 +177,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-1',
         name: 'John Doe',
       },
-      dueDate: new Date(today.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 1 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
     
     tasks.push({
@@ -188,7 +190,7 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-4',
         name: 'Emily Chen',
       },
-      dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
     
     tasks.push({
@@ -201,9 +203,10 @@ const generateMockTasksFromPrompt = (prompt: string): Task[] => {
         id: 'user-2',
         name: 'Alice Smith',
       },
-      dueDate: new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString(),
+      dueDate: new Date(today.getTime() + 14 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
     });
   }
   
+  console.log(`Generated ${tasks.length} tasks from prompt`);
   return tasks;
 };
