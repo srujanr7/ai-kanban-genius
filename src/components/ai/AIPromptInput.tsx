@@ -34,18 +34,28 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
     setIsLoading(true);
     
     try {
+      // Show toast that we're analyzing the prompt
+      toast({
+        title: "Analyzing project description",
+        description: "Identifying tasks, features, and requirements...",
+      });
+      
       // Get tasks from the AI processing function
       const generatedTasks = await processAIPrompt(prompt);
       
       // Log the generated tasks for debugging
       console.log('Generated tasks from AI:', generatedTasks);
       
+      if (!generatedTasks || generatedTasks.length === 0) {
+        throw new Error("No tasks could be generated");
+      }
+      
       // Pass the tasks to the parent component
       onGenerateBoard(generatedTasks);
       
       toast({
-        title: "Board generated",
-        description: "Your Kanban board has been generated successfully.",
+        title: `${generatedTasks.length} tasks generated`,
+        description: "Your Kanban board has been created based on your project description.",
       });
       
       setPrompt('');
@@ -54,7 +64,7 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
       console.error('Error generating board:', error);
       toast({
         title: "Error",
-        description: "Failed to generate board. Please try again.",
+        description: "Failed to generate board. Please try again with more details.",
         variant: "destructive",
       });
     } finally {
@@ -78,6 +88,23 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
     setPrompt('');
     setIsExpanded(false);
   };
+
+  const placeholderExamples = [
+    "Describe your project and I'll create a Kanban board for you...",
+    "E.g. 'Build an e-commerce website with user authentication and product search'",
+    "E.g. 'Create a blog with commenting system and analytics tracking'",
+    "E.g. 'Develop a mobile app with user profiles and notifications'"
+  ];
+
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
+
+  // Rotate placeholder examples
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setPlaceholderIndex((prevIndex) => (prevIndex + 1) % placeholderExamples.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [placeholderExamples.length]);
 
   return (
     <div className={cn(
@@ -111,7 +138,7 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
           onChange={(e) => setPrompt(e.target.value)}
           onKeyDown={handleKeyDown}
           onFocus={() => setIsExpanded(true)}
-          placeholder="Describe your project and I'll create a Kanban board for you..."
+          placeholder={placeholderExamples[placeholderIndex]}
           className={cn(
             "min-h-[60px] resize-none border-0 bg-transparent focus-visible:ring-0 focus-visible:ring-offset-0 text-base",
             isExpanded ? "min-h-[120px]" : "min-h-[60px]"
@@ -134,7 +161,7 @@ const AIPromptInput: React.FC<AIPromptInputProps> = ({ onGenerateBoard, classNam
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
+                  Analyzing Project...
                 </>
               ) : (
                 <>

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { CalendarDays, Filter, Plus, Search, Users } from 'lucide-react';
 import KanbanBoard, { BoardData, Task } from '@/components/board/KanbanBoard';
@@ -105,6 +106,7 @@ const mockBoardData: BoardData = {
 const Board: React.FC = () => {
   const [showAIPrompt, setShowAIPrompt] = useState(false);
   const [boardData, setBoardData] = useState<BoardData>(mockBoardData);
+  const [boardTitle, setBoardTitle] = useState<string>("E-commerce Project Board");
   
   const handleGenerateBoard = (tasks: Task[]) => {
     console.log('Tasks received in Board component:', tasks);
@@ -160,6 +162,10 @@ const Board: React.FC = () => {
     
     console.log('New board data:', newBoardData);
     
+    // Extract project type from tasks and set board title
+    const projectType = extractProjectTypeFromTasks(tasks);
+    setBoardTitle(`${projectType} Project Board`);
+    
     // Update the board with the new data
     setBoardData(newBoardData);
     
@@ -173,12 +179,40 @@ const Board: React.FC = () => {
     setShowAIPrompt(false);
   };
 
+  // Helper to extract project type from tasks
+  const extractProjectTypeFromTasks = (tasks: Task[]): string => {
+    // Get all tags from tasks
+    const allTags = tasks.flatMap(task => task.tags || []);
+    
+    // Common project types to look for
+    const projectTypes = [
+      'e-commerce', 'blog', 'dashboard', 'mobile-app', 
+      'game', 'social-network', 'website'
+    ];
+    
+    // Check if tasks titles contain project type indicators
+    for (const task of tasks) {
+      const lowerTitle = task.title.toLowerCase();
+      for (const type of projectTypes) {
+        if (lowerTitle.includes(type.toLowerCase())) {
+          // Capitalize first letter of each word
+          return type.split('-')
+            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+        }
+      }
+    }
+    
+    // Default project type if none detected
+    return "New";
+  };
+
   return (
     <div className="h-full flex flex-col">
       <div className="mb-6">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-2xl font-bold">E-commerce Project Board</h1>
+            <h1 className="text-2xl font-bold">{boardTitle}</h1>
             <p className="text-muted-foreground">Manage your tasks and track progress</p>
           </div>
           
